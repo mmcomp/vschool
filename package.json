@@ -17,6 +17,7 @@
     "fastify": "^2.7.1",
     "fastify-jwt": "^1.0.0",
     "fastify-static": "^2.5.0",
+    "fastify-url-data": "^2.3.0",
     "fs": "0.0.1-security",
     "knex": "^0.19.1",
     "moment-jalaali": "^0.8.3",

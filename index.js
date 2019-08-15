@@ -29,6 +29,7 @@ const fastify = require('fastify')({
   logger,
 })
 
+fastify.register(require('fastify-url-data'))
 
 fastify.register(require('./auth'))
 fastify.register(require('./route'))

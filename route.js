@@ -6,7 +6,7 @@ const OtpController = require('./controllers/otp.controller')
 
 async function routes (fastify, options) {
   // Open
-  fastify.post('/signin', {
+  fastify.post('/_signin', {
     schema: {
       body: {
         type: 'object',
@@ -108,6 +108,42 @@ async function routes (fastify, options) {
   fastify.get('/otp/:mobile', {
     preValidation: [fastify.authenticate]
   }, OtpController.requestOtp)
+
+  // Others
+  fastify.get('/*', async (req, reply) => {
+    const urlData = req.urlData()
+    console.log('path', urlData.path) // '/foo'
+    console.log('query', urlData.query) // 'a=b&c=d'
+    console.log('host', urlData.host) // '127.0.0.1'
+    console.log('port', urlData.port) // 8080
+  
+    reply.send({
+      status: 1,
+      messages: [{
+        code: 'DummyError',
+        message: 'خظای احمقانه'
+      }],
+      data: {}
+    })
+  })
+
+  fastify.post('/*', async (req, reply) => {
+    const urlData = req.urlData()
+    console.log('path', urlData.path) // '/foo'
+    console.log('query', urlData.query) // 'a=b&c=d'
+    console.log('host', urlData.host) // '127.0.0.1'
+    console.log('port', urlData.port) // 8080
+    console.log('body', req.body)
+  
+    reply.send({
+      status: 1,
+      messages: [{
+        code: 'DummyError',
+        message: 'خظای احمقانه'
+      }],
+      data: {}
+    })
+  })
 }
 
 module.exports = routes

@@ -6,7 +6,7 @@ const OtpController = require('./controllers/otp.controller')
 
 async function routes (fastify, options) {
   // Open
-  fastify.post('/_signin', {
+  fastify.post('/api/signin', {
     schema: {
       body: {
         type: 'object',
@@ -43,7 +43,7 @@ async function routes (fastify, options) {
     }
   })
 
-  fastify.post('/signup', async (request, reply) => {
+  fastify.post('/api/signup', async (request, reply) => {
     const user = await User.createGuestUser()
 
     const token = fastify.jwt.sign(user.toJSON())
@@ -53,7 +53,7 @@ async function routes (fastify, options) {
     })
   })
 
-  fastify.post('/token', {
+  fastify.post('/api/token', {
     schema: {
       body: {
         type: 'object',
@@ -84,12 +84,12 @@ async function routes (fastify, options) {
     })
   })
   // Auth
-  fastify.get('/', {
+  fastify.get('/api/', {
     preValidation: [fastify.authenticate]
   }, UserController.test)
 
   // User
-  fastify.post('/profile', {
+  fastify.post('/api/profile', {
     schema: {
       body: {
         type: 'object',
@@ -105,9 +105,14 @@ async function routes (fastify, options) {
     preValidation: [fastify.authenticate]
   }, UserController.profile)
 
-  fastify.get('/otp/:mobile', {
+  fastify.get('/api/otp/:mobile', {
     preValidation: [fastify.authenticate]
   }, OtpController.requestOtp)
+
+  // Admin
+  fastify.get('/', (request, reply) => {
+    reply.render('index.pug');
+  });
 
   // Others
   fastify.get('/*', async (req, reply) => {

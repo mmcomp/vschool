@@ -21,6 +21,7 @@ const knex = Knex({
   client: (process.env.CLIENT)?process.env.CLIENT:'mysql',
   useNullAsDefault: true,
   connection: dbConnection,
+  pool: { min: 5, max: 30 }
 });
 Model.knex(knex);
 
@@ -28,6 +29,8 @@ const logger = (process.env.DEBUG && process.env.DEBUG=='true')?true:false
 const fastify = require('fastify')({
   logger,
 })
+
+fastify.register(require('fastify-pug'), {views: 'views'})
 
 fastify.register(require('fastify-url-data'))
 

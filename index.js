@@ -2,7 +2,7 @@
 
 require('dotenv').config()
 
-const Knex = require('Knex')
+const Knex = require('knex')
 const { Model } = require('objection')
 const path = require('path')
 

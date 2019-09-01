@@ -7,6 +7,16 @@ class Question extends Model {
     return 'questions'
   }
 
+  $parseDatabaseJson(json) {
+    json = super.$parseDatabaseJson(json)
+    try{
+      json.choices = JSON.parse(json.choices)
+    }catch(e) {
+      json.choices = null
+    }
+    return json;
+  }
+
   static get relationMappings() {
     const Lesson = require('./lesson.model')
 

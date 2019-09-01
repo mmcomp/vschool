@@ -8,11 +8,12 @@ const compressing = require('compressing')
 
 class UserController {
   static async test (request, reply) {
-    const course = await Course.query().eager('[chapters, chapters.[lessons, lessons.questions]]').where('id', 1).first()
-    fs.writeFileSync('./public/course.json', JSON.stringify(course))
-    const compressResult = await compressing.gzip.compressFile('./public/course.json', `./public/course_${course.id}.json.gz`)
-    fs.unlinkSync('./public/course.json')
-    console.log(compressResult)
+    const course = await Course.query().eager('[chapters, chapters.[lessons, lessons.[questions, pages, pages.question]]]').where('id', 1).first()
+    // console.log(course);
+    // fs.writeFileSync('./public/course.json', JSON.stringify(course))
+    // const compressResult = await compressing.gzip.compressFile('./public/course.json', `./public/course_${course.id}.json.gz`)
+    // fs.unlinkSync('./public/course.json')
+    // console.log(compressResult)
     reply.send(course)
 
     // reply.send(request.user)

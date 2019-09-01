@@ -3,6 +3,9 @@
 const User = require('./models/user.model.js')
 const UserController = require('./controllers/user.controller')
 const OtpController = require('./controllers/otp.controller')
+const CourseController = require('./controllers/course.controller')
+const ChapterController = require('./controllers/chapter.controller')
+const LessonController = require('./controllers/lesson.controller')
 
 async function routes (fastify, options) {
   // Open
@@ -105,50 +108,56 @@ async function routes (fastify, options) {
     preValidation: [fastify.authenticate]
   }, UserController.profile)
 
-  fastify.get('/api/otp/:mobile', {
+  fastify.get('/api/otp/:mobile' , {
     preValidation: [fastify.authenticate]
-  }, OtpController.requestOtp)
+  } , OtpController.requestOtp)
 
+  // Course  
+  fastify.get('/api/course/chapters/:courses_id', {
+    preValidation: [fastify.authenticate]
+  }, CourseController.courseChapters)
+
+  fastify.get('/api/course/chapters', {
+    preValidation: [fastify.authenticate]
+  }, CourseController.chapters)
+
+  fastify.get('/api/course/:education_level', {
+    preValidation: [fastify.authenticate]
+  }, CourseController.courseOfEducationLevel)
+
+  fastify.get('/api/course', {
+    preValidation: [fastify.authenticate]
+  }, CourseController.index)
+
+  // Chapter
+  fastify.get('/api/chapter/lessons/:chapters_id', {
+    preValidation: [fastify.authenticate]
+  }, ChapterController.chapterLessons)
+
+  fastify.get('/api/chapter/lessons', {
+    preValidation: [fastify.authenticate]
+  }, ChapterController.lessons)
+
+  fastify.get('/api/chapter', {
+    preValidation: [fastify.authenticate]
+  }, ChapterController.index)
+
+  // Lesson
+  fastify.get('/api/lesson/pages/:lessons_id', {
+    preValidation: [fastify.authenticate]
+  }, LessonController.lessonPages)
+
+  fastify.get('/api/lesson/pages', {
+    preValidation: [fastify.authenticate]
+  }, LessonController.pages)
+
+  fastify.get('/api/lesson', {
+    preValidation: [fastify.authenticate]
+  }, LessonController.index)
   // Admin
   fastify.get('/', (request, reply) => {
     reply.render('index.pug');
   });
-
-  // Others
-  fastify.get('/*', async (req, reply) => {
-    const urlData = req.urlData()
-    console.log('path', urlData.path) // '/foo'
-    console.log('query', urlData.query) // 'a=b&c=d'
-    console.log('host', urlData.host) // '127.0.0.1'
-    console.log('port', urlData.port) // 8080
-  
-    reply.send({
-      status: 1,
-      messages: [{
-        code: 'DummyError',
-        message: 'خظای احمقانه'
-      }],
-      data: {}
-    })
-  })
-
-  fastify.post('/*', async (req, reply) => {
-    const urlData = req.urlData()
-    console.log('path', urlData.path) // '/foo'
-    console.log('query', urlData.query) // 'a=b&c=d'
-    console.log('host', urlData.host) // '127.0.0.1'
-    console.log('port', urlData.port) // 8080
-    console.log('body', req.body)
-  
-    reply.send({
-      status: 1,
-      messages: [{
-        code: 'DummyError',
-        message: 'خظای احمقانه'
-      }],
-      data: {}
-    })
-  })
 }
 
 module.exports = routes

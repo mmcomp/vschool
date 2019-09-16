@@ -7,6 +7,18 @@ class Chapter extends Model {
     return 'chapters'
   }
 
+  static get modifiers() {
+    return {
+      defaultSelects(builder) {
+        builder.select('id', 'name', 'description')
+      },
+
+      orderByChapterOrder(builder) {
+        builder.orderBy('chapter_order')
+      }
+    };
+  }
+
   static get relationMappings() {
     const Course = require('./course.model')
     const Lesson = require('./lesson.model')

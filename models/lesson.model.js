@@ -7,6 +7,18 @@ class Lesson extends Model {
     return 'lessons'
   }
 
+  static get modifiers() {
+    return {
+      defaultSelects(builder) {
+        builder.select('id', 'name', 'description')
+      },
+
+      orderByLessonOrder(builder) {
+        builder.orderBy('lesson_order');
+      }
+    };
+  }
+
   static get relationMappings() {
     const Chapter = require('./chapter.model')
     const Question = require('./question.model')

@@ -3,22 +3,28 @@
 const Chapter = require('../models/chapter.model')
 const Course = require('../models/course.model')
 const Lesson = require('../models/lesson.model')
-const Page = require('../models/page.model')
-const Question = require('../models/question.model')
+// const Page = require('../models/page.model')
+// const Question = require('../models/question.model')
 
 class LessonController {
   static async index (request, reply) {
-    const lessons = await Lesson.query().eager('[ chapter, chapter.[ course ], questions ]').omit(['chapters_id']).omit(Chapter, ['courses_id', 'icon']).omit(Course, ['teacher_id']).omit(Question, ['lessons_id', 'pages_id'])
+    const courses = await Course.query().where('education_level', request.user.education_level).pluck('id') 
+    const chapters = await Chapter.query().whereIn('courses_id', courses).pluck('id')
+    const lessons = await Lesson.query().whereIn('chapters_id', chapters).eager('[ chapter(defaultSelects), chapter(defaultSelects).[ course(defaultSelects) ], questions(defaultSelects) ]')
     reply.send(lessons)
   }
 
   static async pages (request, reply) {
-    const lessons = await Lesson.query().eager('[ chapter, pages, chapter.[ course ], pages.[ question ], questions ]').omit(['chapters_id']).omit(Chapter, ['courses_id', 'icon']).omit(Course, ['teacher_id']).omit(Page, ['lessons_id', 'created_at', 'updated_at']).omit(Question, ['lessons_id', 'pages_id'])
+    const courses = await Course.query().where('education_level', request.user.education_level).pluck('id') 
+    const chapters = await Chapter.query().whereIn('courses_id', courses).pluck('id')
+    const lessons = await Lesson.query().whereIn('chapters_id', chapters).eager('[ chapter(defaultSelects), chapter(defaultSelects).[ course(defaultSelects) ], questions(defaultSelects), pages(defaultSelects, orderByPageOrder) ]')
     reply.send(lessons)
   }
   
   static async lessonPages (request, reply) {
-    const lesson = await Lesson.query().where('id', request.params.lessons_id).eager('[ chapter, pages, chapter.[ course ], pages.[ question ], questions ]').omit(['chapters_id']).omit(Chapter, ['courses_id', 'icon']).omit(Course, ['teacher_id']).omit(Page, ['lessons_id', 'created_at', 'updated_at']).omit(Question, ['lessons_id', 'pages_id']).first()
+    const courses = await Course.query().where('education_level', request.user.education_level).pluck('id') 
+    const chapters = await Chapter.query().whereIn('courses_id', courses).pluck('id')
+    const lesson = await Lesson.query().whereIn('chapters_id', chapters).where('id', request.params.lessons_id).eager('[ chapter(defaultSelects), chapter(defaultSelects).[ course(defaultSelects) ], questions(defaultSelects), pages(defaultSelects, orderByPageOrder) ]').first()
     reply.send(lesson)
   }
 }

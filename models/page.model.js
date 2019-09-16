@@ -7,6 +7,18 @@ class Page extends Model {
     return 'pages'
   }
 
+  static get modifiers() {
+    return {
+      defaultSelects(builder) {
+        builder.select('page')
+      },
+
+      orderByPageOrder(builder) {
+        builder.orderBy('page_order');
+      }
+    };
+  }
+
   $parseDatabaseJson(json) {
     json = super.$parseDatabaseJson(json)
     try{

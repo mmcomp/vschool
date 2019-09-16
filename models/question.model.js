@@ -7,12 +7,25 @@ class Question extends Model {
     return 'questions'
   }
 
+  static get modifiers() {
+    return {
+      defaultSelects(builder) {
+        builder.select('id', 'question', 'answer', 'question_type', 'choices', 'score', 'formulas')
+      },
+    };
+  }
+
   $parseDatabaseJson(json) {
     json = super.$parseDatabaseJson(json)
     try{
       json.choices = JSON.parse(json.choices)
     }catch(e) {
       json.choices = null
+    }
+    try{
+      json.formulas = JSON.parse(json.formulas)
+    }catch(e) {
+      json.formulas = null
     }
     return json;
   }

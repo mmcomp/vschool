@@ -7,6 +7,14 @@ class Course extends Model {
     return 'courses'
   }
 
+  static get modifiers() {
+    return {
+      defaultSelects(builder) {
+        builder.select('id', 'name', 'description', 'duel_time')
+      },
+    };
+  }
+
   static get relationMappings() {
     const Chapter = require('./chapter.model')
 

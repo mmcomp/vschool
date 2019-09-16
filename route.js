@@ -112,6 +112,10 @@ async function routes (fastify, options) {
     preValidation: [fastify.authenticate]
   } , OtpController.requestOtp)
 
+  fastify.get('/api/user/pass_page/:pages_id', {
+    preValidation: [fastify.authenticate]
+  }, UserController.passPage)
+
   // Course  
   fastify.get('/api/course/chapters/:courses_id', {
     preValidation: [fastify.authenticate]
@@ -154,6 +158,7 @@ async function routes (fastify, options) {
   fastify.get('/api/lesson', {
     preValidation: [fastify.authenticate]
   }, LessonController.index)
+
   // Admin
   fastify.get('/', (request, reply) => {
     reply.render('index.pug');

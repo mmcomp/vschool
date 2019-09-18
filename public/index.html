@@ -1,0 +1,31 @@
+<html>
+<head>
+  <title>
+  Web Socket Test
+  </title>
+  <body>
+    <h1 style="text-align: center;">
+      Web Socket Test
+    </h1>
+    <input id="msg" placeholder="Message" value='{"type":"login","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiZm5hbWUiOiLYudmE24wiLCJsbmFtZSI6ItmF2K3Zhdiv24wiLCJlbWFpbCI6Im1hZF9tb29uX2xvdmVyMUB5YWhvby5jb20iLCJwYXNzd29yZCI6IiQyYiQxMCRkMjBMeGk0a01lZmxKU01HQWh2ak11ajZTQjAveFJnYzRuSzBTV1Zwd0ZKcDJzNGJxbXVFZSIsInJlbWVtYmVyX3Rva2VuIjpudWxsLCJzYWx0IjoiJDJiJDEwJGQyMEx4aTRrTWVmbEpTTUdBaHZqTXUiLCJtb2JpbGUiOiIwOTEyMDE3Mjc2OCIsInN0dWRlbnRfbnVtYmVyIjoi2Kfbsduz27PbtNiv27Tbtdu227UiLCJhdmF0YXIiOjEsInNjb3JlIjowLCJnZW5kZXIiOiJtYWxlIiwiZWR1Y2F0aW9uX2xldmVsIjo3LCJzY2hvb2xzX2lkIjoxLCJpc19ndWVzdCI6MCwib3RwIjoiNDc0MiIsImdyb3VwX2lkIjoxLCJkdWVsX3dpbnMiOjAsImR1ZWxfbG9zdHMiOjAsImNyZWF0ZWRfYXQiOiIyMDE5LTA4LTE0VDA1OjIzOjQwLjAwMFoiLCJ1cGRhdGVkX2F0IjoiMjAxOS0wOC0xNFQwNzoxNzoyMy4wMDBaIiwiaWF0IjoxNTY3ODQwODQ3fQ.qNKdAf7Su4_XSPHfAtCldmv9-8prHctVhz1-mVN8SOw"}' /><button onclick="send(document.getElementById('msg').value);">Send</button>
+    <h3>
+    Recieved
+    </h3>
+    <div id="rec"></div>
+    <script>
+    const host = location.origin.replace(/^http/, 'ws')
+    const ws = new WebSocket(host)
+    ws.onmessage = msg => {
+      // console.log(msg.data)
+      let ht = document.getElementById('rec').innerHTML
+      ht = `<div>${msg.data}</div>
+      ${ht}`
+      document.getElementById('rec').innerHTML = ht
+    }
+    function send(msg) {
+      ws.send(msg)
+    }
+    </script>
+  </body>
+</head>
+</html>

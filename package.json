@@ -19,6 +19,7 @@
     "fastify-pug": "^1.1.1",
     "fastify-static": "^2.5.0",
     "fastify-url-data": "^2.3.0",
+    "fastify-ws": "^1.0.3",
     "fs": "0.0.1-security",
     "knex": "^0.19.1",
     "moment-jalaali": "^0.8.3",

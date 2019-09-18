@@ -42,6 +42,31 @@ fastify.register(require('fastify-static'), {
   prefix: '/public/', 
 })
 
+fastify.register(require('fastify-ws'))
+const WSController = require('./controllers/websocket.controller')
+fastify.ready(err => {
+  if (err) throw err
+ 
+  console.log('Socket Server started.')
+ 
+  fastify.ws
+    .on('connection', (socket) => {
+      const wsController = new WSController(socket, fastify)
+      wsController.connect(socket, fastify).then(res=>{
+        console.log('Exec WS Controller', res)
+      }).catch(e => {
+        console.log('Error WS Controller', e)
+      })
+    })
+    // .on('connection', socket => {
+    //   console.log('Client connected.')
+ 
+    //   socket.on('message', msg => socket.send(msg)) 
+ 
+    //   socket.on('close', () => console.log('Client disconnected.'))
+    // })
+})
+
 const start = async () => {
   try {
     await fastify.listen((process.env.PORT)?process.env.PORT:3000, '0.0.0.0')

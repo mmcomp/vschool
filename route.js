@@ -6,6 +6,7 @@ const OtpController = require('./controllers/otp.controller')
 const CourseController = require('./controllers/course.controller')
 const ChapterController = require('./controllers/chapter.controller')
 const LessonController = require('./controllers/lesson.controller')
+const DuelController = require('./controllers/duel.controller')
 
 async function routes (fastify, options) {
   // Open
@@ -116,6 +117,22 @@ async function routes (fastify, options) {
     preValidation: [fastify.authenticate]
   }, UserController.passPage)
 
+  fastify.post('/api/pushid', {
+    schema: {
+      body: {
+        type: 'object',
+        required: ['push_id'],
+        properties: {
+          push_id: {
+            type: 'string',
+            minLength: 5
+          }
+        }
+      }
+    },
+    preValidation: [fastify.authenticate]
+  }, UserController.setPushId)
+
   // Course  
   fastify.get('/api/course/chapters/:courses_id', {
     preValidation: [fastify.authenticate]
@@ -158,6 +175,11 @@ async function routes (fastify, options) {
   fastify.get('/api/lesson', {
     preValidation: [fastify.authenticate]
   }, LessonController.index)
+
+  // Duel
+  fastify.get('/api/duel/start', {
+    preValidation: [fastify.authenticate]
+  }, DuelController.start)
 
   // Admin
   fastify.get('/', (request, reply) => {

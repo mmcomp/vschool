@@ -9,6 +9,7 @@ const UserCourse = require('../models/user_course.model')
 const UserChapter = require('../models/user_chapter.model')
 const UserLesson = require('../models/user_lesson.model')
 const UserPage = require('../models/user_page.model')
+const axios = require('axios')
 
 // const fs = require('fs')
 // const compressing = require('compressing')
@@ -25,6 +26,17 @@ class UserController {
 
     // reply.send(request.user)
   }
+
+  static async setPushId (request, reply) {
+    User.query().where('id', request.user.id).update({
+      push_id: request.body.push_id,
+    }).then(res=>{
+    }).catch(e=>{
+      console.log('Set USer Push Id Error', e)
+    })
+    reply.send()
+  }
+
 
   static async profile (request, reply) {
     const user = await User.query().where('id', request.user.id).first()
@@ -174,6 +186,45 @@ class UserController {
 
 
     return reply.send(out)
+  }
+
+  static async sendPushe (pushIds, title, content, icon) {
+    try{
+      let pusheData = {
+        applications: [process.env.PUSH_PACKAGE],
+        notification: {
+          title,
+          content,
+          action: {
+              url: "",
+              action_type: "A"
+          }
+        },
+      }
+      if(icon) {
+        pusheData.notification['icon'] = icon
+      }
+      if(pushIds && pushIds[0]) {
+        pusheData['filter'] = {
+          pushe_id: pushIds,
+        }
+      }
+      const res = await axios({
+        method: 'POST',
+        headers: {
+            'Authorization': 'Token ' + process.env.PUSH_TOKEN,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        },
+        url : process.env.PUSH_URL, 
+        data: pusheData,
+      })
+
+      return res
+    }catch(e) {
+      console.log('Send Pushe Error')
+      console.log(e)
+    }
   }
 }
 

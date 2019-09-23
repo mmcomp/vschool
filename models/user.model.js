@@ -8,6 +8,14 @@ class User extends Model {
     return 'users'
   }
 
+  static get modifiers() {
+    return {
+      defaultSelects(builder) {
+        builder.select('fname', 'lname', 'avatar', 'score', 'push_id')
+      },
+    };
+  }
+
   async $beforeInsert (queryContext) {
     await super.$beforeInsert(queryContext)
     const {password} = this;

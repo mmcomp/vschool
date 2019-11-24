@@ -15,6 +15,11 @@ module.exports = fp(async function(fastify, opts) {
       }).catch(e => {
         
       })
+      if(!request.user.education_level) {
+        const user = await User.query().select('*').where('id', request.user.id).first()
+        request.user.education_level = user.education_level
+      }
+      console.log(request.user)
     } catch (err) {
       reply.send(err)
     }

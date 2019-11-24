@@ -21,6 +21,7 @@ class Page extends Model {
 
   $parseDatabaseJson(json) {
     json = super.$parseDatabaseJson(json)
+    console.log('parse json page')
     try{
       json.page = JSON.parse(json.page)
     }catch(e) {

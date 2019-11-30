@@ -17,9 +17,16 @@ module.exports = fp(async function(fastify, opts) {
       })
       if(!request.user.education_level) {
         const user = await User.query().select('*').where('id', request.user.id).first()
-        request.user.education_level = user.education_level
+        if(user) {
+          request.user.education_level = user.education_level
+        }else {
+          reply.code(401).send({
+            statusCode: 401,
+            error: "Unautherized",
+            message: "Un Autherized User"
+          })
+        }
       }
-      console.log(request.user)
     } catch (err) {
       reply.send(err)
     }

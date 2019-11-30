@@ -25,7 +25,7 @@ class LessonController {
     // const courses = await Course.query().where('education_level', request.user.education_level).pluck('id') 
     // const chapters = await Chapter.query().whereIn('courses_id', courses).pluck('id')
     // const lesson = await Lesson.query().whereIn('chapters_id', chapters).where('id', request.params.lessons_id).eager('[ chapter(defaultSelects), chapter(defaultSelects).[ course(defaultSelects) ], questions(defaultSelects), pages(defaultSelects, orderByPageOrder) ]').first()
-    const tmpPages = await Page.query().select(['id', 'page']).where('lessons_id', request.params.lessons_id)
+    const tmpPages = await Page.query().select(['id', 'page']).where('lessons_id', request.params.lessons_id).eager('question(defaultSelects)')
     let pages = [], datas
     for(let page of tmpPages) {
       datas = []

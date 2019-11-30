@@ -25,7 +25,20 @@ class LessonController {
     // const courses = await Course.query().where('education_level', request.user.education_level).pluck('id') 
     // const chapters = await Chapter.query().whereIn('courses_id', courses).pluck('id')
     // const lesson = await Lesson.query().whereIn('chapters_id', chapters).where('id', request.params.lessons_id).eager('[ chapter(defaultSelects), chapter(defaultSelects).[ course(defaultSelects) ], questions(defaultSelects), pages(defaultSelects, orderByPageOrder) ]').first()
-    const pages = await Page.query().select(['id', 'page']).where('lessons_id', request.params.lessons_id)
+    const tmpPages = await Page.query().select(['id', 'page']).where('lessons_id', request.params.lessons_id)
+    let pages = [], datas
+    for(let page of tmpPages) {
+      datas = []
+      for(let data of page.page.data) {
+        delete data.deleted
+        if(data.type=='image') {
+          data.data = `/page_images/page_${page.id}/${data.data}`
+        }
+        datas.push(data)
+      }
+      page.page.data = datas
+      pages.push(page)
+    }
     reply.send(pages)
   }
 }

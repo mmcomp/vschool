@@ -10,7 +10,7 @@ class Question extends Model {
   static get modifiers() {
     return {
       defaultSelects(builder) {
-        builder.select('id', 'question', 'answer', 'question_type', 'choices', 'score', 'formulas')
+        builder.select('id', 'question', 'answer', 'question_type', 'choices', 'score')
       },
     };
   }
@@ -21,11 +21,6 @@ class Question extends Model {
       json.choices = JSON.parse(json.choices)
     }catch(e) {
       json.choices = null
-    }
-    try{
-      json.formulas = JSON.parse(json.formulas)
-    }catch(e) {
-      json.formulas = null
     }
     return json;
   }

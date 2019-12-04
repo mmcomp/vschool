@@ -10,7 +10,7 @@ class Question extends Model {
   static get modifiers() {
     return {
       defaultSelects(builder) {
-        builder.select('id', 'question', 'answer', 'question_type', 'choices', 'score')
+        builder.select('id', 'question', 'answer', 'question_type', 'choices', 'solution', 'score')
       },
     };
   }

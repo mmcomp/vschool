@@ -7,6 +7,7 @@ const CourseController = require('./controllers/course.controller')
 const ChapterController = require('./controllers/chapter.controller')
 const LessonController = require('./controllers/lesson.controller')
 const DuelController = require('./controllers/duel.controller')
+const QuestionController = require('./controllers/question.controller')
 
 async function routes (fastify, options) {
   // Open
@@ -175,6 +176,9 @@ async function routes (fastify, options) {
   fastify.get('/api/lesson', {
     preValidation: [fastify.authenticate]
   }, LessonController.index)
+
+  // Question
+  fastify.get('/api/question/:id', QuestionController.load)
 
   // Duel
   fastify.get('/api/duel/start', {

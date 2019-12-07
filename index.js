@@ -30,6 +30,10 @@ const fastify = require('fastify')({
   logger,
 })
 
+fastify.register(require('fastify-cors'), { 
+  origin: true,
+})
+
 fastify.register(require('fastify-pug'), {views: 'views'})
 
 fastify.register(require('fastify-url-data'))

@@ -8,6 +8,7 @@ const ChapterController = require('./controllers/chapter.controller')
 const LessonController = require('./controllers/lesson.controller')
 const DuelController = require('./controllers/duel.controller')
 const QuestionController = require('./controllers/question.controller')
+const PageController = require('./controllers/page.controller')
 
 async function routes (fastify, options) {
   // Open
@@ -179,6 +180,9 @@ async function routes (fastify, options) {
 
   // Question
   fastify.get('/api/question/:id', QuestionController.load)
+
+  // Page
+  fastify.get('/api/page/:id', PageController.load)
 
   // Duel
   fastify.get('/api/duel/start', {

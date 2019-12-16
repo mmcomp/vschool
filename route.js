@@ -144,6 +144,10 @@ async function routes (fastify, options) {
     preValidation: [fastify.authenticate]
   }, CourseController.chapters)
 
+  fastify.get('/api/course/map/:courses_id', {
+    preValidation: [fastify.authenticate]
+  }, CourseController.map)
+
   fastify.get('/api/course/:education_level', {
     preValidation: [fastify.authenticate]
   }, CourseController.courseOfEducationLevel)

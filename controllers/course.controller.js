@@ -69,6 +69,19 @@ class CourseController {
     }
     reply.send(chapters)
   }
+
+  static async preview (request, reply) {
+    let chapters = await Chapter.query().select(['id', 'name', 'icon', 'description']).where('courses_id', request.params.courses_id).eager('lessons(orderByLessonOrder, defaultSelects)').orderBy('chapter_order')
+    for(let i in chapters) {
+      chapters[i].score = 0
+      chapters[i].stars = 0
+      chapters[i].quiz_status = 'didnot'
+      for(let j in chapters[i].lessons) {
+        chapters[i].lessons[j].quiz_status = 'didnot'
+      }
+    }
+    reply.send(chapters)
+  }
 }
 
 module.exports = CourseController

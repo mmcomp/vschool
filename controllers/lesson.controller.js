@@ -29,12 +29,14 @@ class LessonController {
     let pages = [], datas
     for(let page of tmpPages) {
       datas = []
-      for(let data of page.page.data) {
-        delete data.deleted
-        if(data.type=='image') {
-          data.data = `/page_images/page_${page.id}/${data.data}`
+      if(page.page) {
+        for(let data of page.page.data) {
+          delete data.deleted
+          if(data.type=='image') {
+            data.data = `/page_images/page_${page.id}/${data.data}`
+          }
+          datas.push(data)
         }
-        datas.push(data)
       }
       page.page.data = datas
       pages.push(page)

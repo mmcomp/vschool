@@ -23,7 +23,9 @@ class ChapterController {
   static async exam (request, reply) {
     const lessons = await Lesson.query().where('chapters_id', request.params.chapters_id).pluck('id')
     const pages = await Page.query().whereIn('lessons_id', lessons).pluck('id')
-    const questions = await Question.query().select(['id', 'question', 'question_type', 'solution', 'choices']).where('chapters_id', request.params.chapters_id).orWhereIn('lessons_id', lessons).orWhereIn('pages_id', pages).limit(20)
+    const questions = await Question.query().select(['id', 'question', 'question_type', 'solution', 'choices', 'answer']).where((builder) => {
+      builder.where('chapters_id', request.params.chapters_id).orWhereIn('lessons_id', lessons).orWhereIn('pages_id', pages)
+    }).where('question_type', '!=', 'answer').limit(20)
     reply.send(questions)
   }
 

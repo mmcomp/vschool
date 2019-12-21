@@ -168,6 +168,10 @@ async function routes (fastify, options) {
     preValidation: [fastify.authenticate]
   }, ChapterController.lessons)
 
+  fastify.get('/api/chapter/exam/:chapters_id', {
+    preValidation: [fastify.authenticate]
+  }, ChapterController.exam)
+  
   fastify.get('/api/chapter', {
     preValidation: [fastify.authenticate]
   }, ChapterController.index)

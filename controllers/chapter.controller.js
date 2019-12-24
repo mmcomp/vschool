@@ -26,7 +26,10 @@ class ChapterController {
     const questions = await Question.query().select(['id', 'question', 'question_type', 'solution', 'choices', 'answer']).where((builder) => {
       builder.where('chapters_id', request.params.chapters_id).orWhereIn('lessons_id', lessons).orWhereIn('pages_id', pages)
     }).where('question_type', '!=', 'answer').limit(20)
-    reply.send(questions)
+    reply.send({
+      questions: questions,
+      advance: 3,
+    })
   }
 
   static async chapterLessons (request, reply) {

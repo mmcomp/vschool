@@ -6,6 +6,7 @@ const Chapter = require('../models/chapter.model')
 const Question = require('../models/question.model')
 const Page = require('../models/page.model')
 const Lesson = require('../models/lesson.model')
+const Setting = require('../models/setting.model')
 
 class ChapterController {
   static async index (request, reply) {
@@ -21,6 +22,11 @@ class ChapterController {
   }
   
   static async exam (request, reply) {
+    let advance = 3
+    const advanceSetting = await Setting.query().where('key', 'chapter_exam_advance').first()
+    if(advanceSetting && !isNaN(parseInt(advanceSetting.value, 10))) {
+      advance = parseInt(advanceSetting.value, 10)
+    }
     const lessons = await Lesson.query().where('chapters_id', request.params.chapters_id).pluck('id')
     const pages = await Page.query().whereIn('lessons_id', lessons).pluck('id')
     const questions = await Question.query().select(['id', 'question', 'question_type', 'solution', 'choices', 'answer']).where((builder) => {
@@ -28,7 +34,7 @@ class ChapterController {
     }).where('question_type', '!=', 'answer').limit(20)
     reply.send({
       questions: questions,
-      advance: 3,
+      advance,
     })
   }
 

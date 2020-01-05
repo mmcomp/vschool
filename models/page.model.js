@@ -48,14 +48,22 @@ class Page extends Model {
           to: 'lessons.id'
         }
       },
+      // question: {
+      //   relation: Model.BelongsToOneRelation,
+      //   modelClass: Question,
+      //   join: {
+      //     from: 'pages.id',
+      //     to: 'questions.pages_id'
+      //   }
+      // },
       question: {
-        relation: Model.BelongsToOneRelation,
+        relation: Model.HasManyRelation,
         modelClass: Question,
         join: {
           from: 'pages.id',
           to: 'questions.pages_id'
         }
-      }
+      },
     }
   }
 }

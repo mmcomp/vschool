@@ -38,6 +38,9 @@ class LessonController {
           datas.push(data)
         }
       }
+      if(!page.page) {
+        page.page = {}
+      }
       page.page.data = datas
       pages.push(page)
     }

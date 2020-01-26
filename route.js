@@ -135,6 +135,10 @@ async function routes (fastify, options) {
     preValidation: [fastify.authenticate]
   }, UserController.setPushId)
 
+  fastify.post('/api/contacts', {
+    preValidation: [fastify.authenticate]
+  }, UserController.contacts)
+
   // Course  
   fastify.get('/api/course/chapters/:courses_id', {
     preValidation: [fastify.authenticate]

@@ -37,7 +37,6 @@ class UserController {
     reply.send()
   }
 
-
   static async profile (request, reply) {
     const user = await User.query().where('id', request.user.id).first()
     if(!user) {
@@ -225,6 +224,21 @@ class UserController {
       console.log('Send Pushe Error')
       console.log(e)
     }
+  }
+
+  static async contacts (request, reply) {
+    const user = await User.query().where('id', request.user.id).first()
+    if(!user) {
+      return reply.code(404).send({
+        statusCode: 404,
+        error: "Not Found",
+        message: "کاربر شما درست وارد نشده است مجدد توکن بگیرید"
+      })
+    }
+    const mobiles = request.body.contacts
+    const contacts = await User.query().select(['fname', 'lname', 'id', 'avatar']).whereIn('mobile', mobiles).where('is_guest', 0)
+    console.log(request.body)
+    reply.code(200).send(contacts)
   }
 }
 

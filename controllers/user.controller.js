@@ -190,21 +190,18 @@ class UserController {
   static async sendPushe (pushIds, title, content, icon) {
     try{
       let pusheData = {
-        applications: [process.env.PUSH_PACKAGE],
-        notification: {
+        app_ids: [process.env.PUSH_PACKAGE],
+        data: {
           title,
           content,
-          action: {
-              url: "",
-              action_type: "A"
-          }
+          show_app: "true",
         },
       }
       if(icon) {
-        pusheData.notification['icon'] = icon
+        pusheData.data['icon'] = icon
       }
       if(pushIds && pushIds[0]) {
-        pusheData['filter'] = {
+        pusheData['filters'] = {
           pushe_id: pushIds,
         }
       }
@@ -223,7 +220,12 @@ class UserController {
     }catch(e) {
       console.log('Send Pushe Error')
       console.log(e)
+      return e
     }
+  }
+
+  static async pushTest(request, reply) {
+    reply .send(UserController.sendPushe([], 'Test One', 'Test One Push'))
   }
 
   static async contacts (request, reply) {

@@ -136,8 +136,23 @@ async function routes (fastify, options) {
   }, UserController.setPushId)
 
   fastify.post('/api/contacts', {
+    schema: {
+      body: {
+        type: 'object',
+        required: ['contacts'],
+        properties: {
+          contacts: {
+            type: 'array',
+            minLength: 1
+          }
+        }
+      }
+    },
     preValidation: [fastify.authenticate]
   }, UserController.contacts)
+
+
+  fastify.get('/api/push', UserController.pushTest)
 
   // Course  
   fastify.get('/api/course/chapters/:courses_id', {
@@ -203,6 +218,33 @@ async function routes (fastify, options) {
   fastify.get('/api/duel/start', {
     preValidation: [fastify.authenticate]
   }, DuelController.start)
+
+  fastify.post('/api/duel/setcourse', {
+    schema: {
+      body: {
+        type: 'object',
+        required: ['duel_id', 'course_id'],
+        properties: {
+          duel_id: {
+            type: 'integer',
+            min: 1
+          },
+          course_id: {
+            type: 'integer',
+            min: 0
+          },
+          answers: {
+            type: 'object'
+          }
+        }
+      }
+    },
+    preValidation: [fastify.authenticate]
+  }, DuelController.setCourse)
+
+  fastify.get('/api/duel', {
+    preValidation: [fastify.authenticate]
+  }, DuelController.index)
 
   // Admin
   fastify.get('/', (request, reply) => {

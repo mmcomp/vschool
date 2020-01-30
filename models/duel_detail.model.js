@@ -2,20 +2,10 @@
 
 const { Model } = require('objection')
  
-class Duel extends Model {
+class DuelDetail extends Model {
   static get tableName () {
-    return 'duels'
+    return 'duel_details'
   }
-  
-  // $parseDatabaseJson(json) {
-  //   json = super.$parseDatabaseJson(json)
-  //   try{
-  //     json.details = JSON.parse(json.details)
-  //   }catch(e) {
-  //     json.details = {}
-  //   }
-  //   return json;
-  // }
 
   async $beforeInsert (queryContext) {
     await super.$beforeInsert(queryContext)
@@ -30,43 +20,44 @@ class Duel extends Model {
 
   static get relationMappings() {
     const User = require('./user.model')
-    const DuelDetail = require('./duel_detail.model')
+    const Duel = require('./duel.model')
     const DuelQuestion = require('./duel_question.model')
+    const Course = require('./course.model')
     return {
-      starter: {
+      user: {
         relation: Model.BelongsToOneRelation,
         modelClass: User,
         join: {
-          from: 'duels.starter_users_id',
+          from: 'duel_details.users_id',
           to: 'users.id'
         }
       },
-      opponent: {
+      duel: {
         relation: Model.BelongsToOneRelation,
-        modelClass: User,
+        modelClass: Duel,
         join: {
-          from: 'duels.opponent_users_id',
-          to: 'users.id'
+          from: 'duel_details.duels_id',
+          to: 'duels.id'
         }
       },
-      details: {
-        relation: Model.HasManyRelation,
-        modelClass: DuelDetail,
+      course: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Course,
         join: {
-          from: 'duels.id',
-          to: 'duel_details.duels_id'
+          from: 'duel_details.courses_id',
+          to: 'courses.id'
         }
       },
       questions: {
         relation: Model.HasManyRelation,
         modelClass: DuelQuestion,
         join: {
-          from: 'duels.id',
-          to: 'duel_questions.duels_id'
+          from: 'duel_details.id',
+          to: 'duel_questions.duel_details_id'
         }
       },
     }
   }
 }
 
-module.exports = Duel
+module.exports = DuelDetail

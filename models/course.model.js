@@ -1,6 +1,6 @@
 'use strict'
 
-const { Model } = require('objection')
+const { Model, raw } = require('objection')
  
 class Course extends Model {
   static get tableName () {
@@ -29,6 +29,13 @@ class Course extends Model {
       }
     }
   }
+
+  async randomQuestion (count = 3) {
+    const Question  = require('./question.model')
+    const questions = await Question.query().where('courses_id', this.id).limit(count).orderBy(raw('RAND()'))
+    return questions
+  }
+
 }
 
 module.exports = Course

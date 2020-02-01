@@ -181,8 +181,6 @@ class DuelController {
   }
 
   static async setCourse (request, reply) {
-    return reply.send(await DuelController.status())
-
     const duel = await Duel.query().where('id', request.body.duel_id).eager('[details, details.[questions], starter(defaultSelects), opponent(defaultSelects)]').first()
     if(!duel) {
       return reply.code(404).send('Duel not found')
@@ -341,6 +339,16 @@ class DuelController {
     })
 
     reply.send(questions)
+  }
+
+  static async list (request, reply) {
+    DuelController.status()
+    
+    const duels = await Duel.query().select(['id', 'user_turn', 'status', 'updated_at']).where(function(query) {
+      query.where('starter_users_id', request.user.id).orWhere('opponent_users_id', request.user.id)
+    }).whereNotIn('status', ['waiting', 'matched', 'started']).eager('[starter(defaultSelects), opponent(defaultSelects), details, details.[questions], questions]')
+
+    reply.send(duels)
   }
 }
 

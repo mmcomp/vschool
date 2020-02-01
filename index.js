@@ -74,6 +74,7 @@ fastify.ready(err => {
 const start = async () => {
   try {
     await fastify.listen((process.env.PORT)?process.env.PORT:3000, '0.0.0.0')
+    require('./cronJobs')
   } catch (err) {
     fastify.log.error(err)
     process.exit(1)

@@ -9,9 +9,9 @@ const UserController = require('./user.controller')
 
 
 class DuelController {
-  static async status () {
+  static timeMines (inp) {
     let today = new Date()
-    today.setSeconds(-1 * process.env.DUEL_TIMEOUT)
+    today.setSeconds(-1 * inp)
     let dd = today.getDate() 
     let mm = today.getMonth() + 1
     let hh = today.getHours()
@@ -34,7 +34,56 @@ class DuelController {
       ss = '0' + ss 
     }   
     today = yyyy + '-' + mm + '-' + dd + ' ' + hh + ':' + ii + ':' + ss 
-    await Duel.query().where('opponent_users_id', 0).where('updated_at', '<', today).delete()
+    return today
+  }
+
+  static async status () {
+    const matchTimeout = DuelController.timeMines(process.env.DUEL_TIMEOUT)
+    await Duel.query().where('opponent_users_id', 0).where('updated_at', '<', matchTimeout).delete()
+    const responseTimeout = DuelController.timeMines(process.env.DUEL_REQUEST_TIMEOUT)
+    const timeoutDuels = await Duel.query().where('opponent_users_id', '!=', 0).where('status', 'matched').where('updated_at', '<', responseTimeout).eager('[starter(defaultSelects), opponent(defaultSelects)]')
+    for(let duel of timeoutDuels) {
+      await Duel.query().where('id', duel.id).update({
+        status: 'timeout_answer_' + duel.user_turn
+      })
+      ///PUSH
+      if(duel.starter.push_id) {
+        console.log('Send Push to ' + duel.starter.push_id,  process.env.PUSH_FINISH_CONTENT
+        .replace(/#user#/g, `${(duel.opponent.fname)?duel.opponent.fname:''} ${duel.opponent.lname}`)
+        .replace(/#congrats#/g, (duel.user_turn!='starter')?`تبریک`:`تسلیت`)
+        .replace(/#stat#/g, ((duel.user_turn!='starter')?`برنده`:`بازنده`)))
+        UserController.sendPushe([duel.starter.push_id], process.env.PUSH_FINISH_TITLE, process.env.PUSH_FINISH_CONTENT
+          .replace(/#user#/g, `${(duel.opponent.fname)?duel.opponent.fname:''} ${duel.opponent.lname}`)
+          .replace(/#congrats#/g, (duel.user_turn!='starter')?`تبریک`:`تسلیت`)
+          .replace(/#stat#/g, ((duel.user_turn!='starter')?`برنده`:`بازنده`))
+        ).then(res=>{
+          console.log(`Send Push To ${duel.starter.fname} ${duel.starter.lname} Result:`)
+          console.log(res.data)
+        }).catch(e=>{
+          console.log(`Send Push To ${duel.starter.fname} ${duel.starter.lname} Error:`)
+          console.log(e)
+        })
+      }
+      if(duel.opponent.push_id) {
+        console.log('Send Push to ' + duel.opponent.push_id, process.env.PUSH_FINISH_CONTENT
+        .replace(/#user#/g, `${(duel.opponent.fname)?duel.opponent.fname:''} ${duel.opponent.lname}`)
+        .replace(/#congrats#/g, (duel.user_turn!='opponent')?`تبریک`:`تسلیت`)
+        .replace(/#stat#/g, ((duel.user_turn!='opponent')?`برنده`:`بازنده`)))
+        UserController.sendPushe([duel.opponent.push_id],  process.env.PUSH_FINISH_TITLE, process.env.PUSH_FINISH_CONTENT
+          .replace(/#user#/g, `${(duel.opponent.fname)?duel.opponent.fname:''} ${duel.opponent.lname}`)
+          .replace(/#congrats#/g, (duel.user_turn!='opponent')?`تبریک`:`تسلیت`)
+          .replace(/#stat#/g, ((duel.user_turn!='opponent')?`برنده`:`بازنده`))
+        ).then(res=>{
+          console.log(`Send Push To ${duel.opponent.fname} ${duel.opponent.lname} Result:`)
+          console.log(res.data)
+        }).catch(e=>{
+          console.log(`Send Push To ${duel.opponent.fname} ${duel.opponent.lname} Error:`)
+          console.log(e)
+        })
+      }
+      //\PUSH
+    }
+    return 'done'
   }
 
   static async start (request, reply) {
@@ -132,9 +181,9 @@ class DuelController {
   }
 
   static async setCourse (request, reply) {
-    DuelController.status()
+    return reply.send(await DuelController.status())
 
-    const duel = await Duel.query().where('id', request.body.duel_id).eager('[details, details.[questions]]').first()
+    const duel = await Duel.query().where('id', request.body.duel_id).eager('[details, details.[questions], starter(defaultSelects), opponent(defaultSelects)]').first()
     if(!duel) {
       return reply.code(404).send('Duel not found')
     }
@@ -165,9 +214,7 @@ class DuelController {
       }
     }
 
-    if(duel.details.length>=3 && request.body.course_id>0) {
-      return reply.code(403).send('Duel is finished')
-    }else if(duel.details.length>=3){
+    if(duel.details.length>=3){
       //Finish Duel
       let starterResults = 0
       let opponentResults = 0
@@ -189,34 +236,53 @@ class DuelController {
         duelStatus += '_opponent_wined'
       }
 
+
       await Duel.query().where('id', duel.id).update({
         status: duelStatus
       })
       ///PUSH
-      // if(duel.starter.push_id) {
-      //   console.log('Send Push to ' + duel.starter.push_id)
-      //   UserController.sendPushe([duel.starter.push_id], process.env.PUSH_TITLE, process.env.PUSH_CONTENT.replace(/#user#/g, `${duel.opponent.fname} ${duel.opponent.lname}`)).then(res=>{
-      //     console.log(`Send Push To ${duel.starter.fname} ${duel.starter.lname} Result:`)
-      //     console.log(res.data)
-      //   }).catch(e=>{
-      //     console.log(`Send Push To ${duel.starter.fname} ${duel.starter.lname} Error:`)
-      //     console.log(e)
-      //   })
-      // }
-      // if(duel.opponent.push_id) {
-      //   console.log('Send Push to ' + duel.opponent.push_id)
-      //   UserController.sendPushe([duel.opponent.push_id], process.env.PUSH_TITLE, process.env.PUSH_CONTENT.replace(/#user#/g, `${duel.starter.fname} ${duel.starter.lname}`)).then(res=>{
-      //     console.log(`Send Push To ${duel.opponent.fname} ${duel.opponent.lname} Result:`)
-      //     console.log(res.data)
-      //   }).catch(e=>{
-      //     console.log(`Send Push To ${duel.opponent.fname} ${duel.opponent.lname} Error:`)
-      //     console.log(e)
-      //   })
-      // }
+      if(duel.starter.push_id) {
+        console.log('Send Push to ' + duel.starter.push_id,  process.env.PUSH_FINISH_CONTENT
+        .replace(/#user#/g, `${(duel.opponent.fname)?duel.opponent.fname:''} ${duel.opponent.lname}`)
+        .replace(/#congrats#/g, (starterResults>=opponentResults)?`تبریک`:`تسلیت`)
+        .replace(/#stat#/g, ((starterResults>opponentResults)?`برنده`:((starterResults<opponentResults)?`بازنده`:`مساوی`))))
+        UserController.sendPushe([duel.starter.push_id], process.env.PUSH_FINISH_TITLE, process.env.PUSH_FINISH_CONTENT
+          .replace(/#user#/g, `${(duel.opponent.fname)?duel.opponent.fname:''} ${duel.opponent.lname}`)
+          .replace(/#congrats#/g, (starterResults>=opponentResults)?`تبریک`:`تسلیت`)
+          .replace(/#stat#/g, ((starterResults>opponentResults)?`برنده`:((starterResults<opponentResults)?`بازنده`:`مساوی`)))
+        ).then(res=>{
+          console.log(`Send Push To ${duel.starter.fname} ${duel.starter.lname} Result:`)
+          console.log(res.data)
+        }).catch(e=>{
+          console.log(`Send Push To ${duel.starter.fname} ${duel.starter.lname} Error:`)
+          console.log(e)
+        })
+      }
+      if(duel.opponent.push_id) {
+        console.log('Send Push to ' + duel.opponent.push_id, process.env.PUSH_FINISH_CONTENT
+        .replace(/#user#/g, `${(duel.starter.fname)?duel.starter.fname:''} ${duel.starter.lname}`)
+        .replace(/#congrats#/g, (starterResults<=opponentResults)?`تبریک`:`تسلیت`)
+        .replace(/#stat#/g, ((starterResults<opponentResults)?`برنده`:((starterResults>opponentResults)?`بازنده`:`مساوی`))))
+        UserController.sendPushe([duel.opponent.push_id],  process.env.PUSH_FINISH_TITLE, process.env.PUSH_FINISH_CONTENT
+          .replace(/#user#/g, `${(duel.starter.fname)?duel.starter.fname:'' } ${duel.starter.lname}`)
+          .replace(/#congrats#/g, (starterResults<=opponentResults)?`تبریک`:`تسلیت`)
+          .replace(/#stat#/g, ((starterResults<opponentResults)?`برنده`:((starterResults>opponentResults)?`بازنده`:`مساوی`)))
+        ).then(res=>{
+          console.log(`Send Push To ${duel.opponent.fname} ${duel.opponent.lname} Result:`)
+          console.log(res.data)
+        }).catch(e=>{
+          console.log(`Send Push To ${duel.opponent.fname} ${duel.opponent.lname} Error:`)
+          console.log(e)
+        })
+      }
       //\PUSH
+      return reply.send({
+        yourResult: (isStarter)?starterResults:opponentResults,
+        otheResult: (isStarter)?opponentResults:starterResults,
+      })
     }
 
-    if((duel.user_turn=='starter' && duel.starter_users_id!=request.user.i)||(duel.user_turn=='opponent' && duel.opponent_users_id!=request.user.id)) {
+    if((duel.user_turn=='starter' && duel.starter_users_id!=request.user.id)||(duel.user_turn=='opponent' && duel.opponent_users_id!=request.user.id)) {
       return reply.code(400).send('It is not your turn in this duel')
     }
 
@@ -269,6 +335,10 @@ class DuelController {
         questions_id: question.id,
       })
     }
+
+    await Duel.query().where('id', duel.id).update({
+      user_turn: (isStarter? 'opponent': 'starter'),
+    })
 
     reply.send(questions)
   }

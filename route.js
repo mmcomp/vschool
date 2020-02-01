@@ -135,6 +135,14 @@ async function routes (fastify, options) {
     preValidation: [fastify.authenticate]
   }, UserController.setPushId)
 
+  fastify.get('/api/contacts/add/:users_id', {
+    preValidation: [fastify.authenticate]
+  }, UserController.addFriend)
+
+  fastify.get('/api/contacts/list', {
+    preValidation: [fastify.authenticate]
+  }, UserController.list)
+
   fastify.post('/api/contacts', {
     schema: {
       body: {
@@ -241,6 +249,10 @@ async function routes (fastify, options) {
     },
     preValidation: [fastify.authenticate]
   }, DuelController.setCourse)
+
+  fastify.get('/api/duel/list', {
+    preValidation: [fastify.authenticate]
+  }, DuelController.list)
 
   fastify.get('/api/duel', {
     preValidation: [fastify.authenticate]

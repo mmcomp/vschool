@@ -9,6 +9,7 @@ const UserCourse = require('../models/user_course.model')
 const UserChapter = require('../models/user_chapter.model')
 const UserLesson = require('../models/user_lesson.model')
 const UserPage = require('../models/user_page.model')
+const UserContact = require('../models/user_contact.model')
 const axios = require('axios')
 
 // const fs = require('fs')
@@ -238,9 +239,66 @@ class UserController {
       })
     }
     const mobiles = request.body.contacts
-    const contacts = await User.query().select(['fname', 'lname', 'id', 'avatar']).whereIn('mobile', mobiles).where('is_guest', 0)
-    console.log(request.body)
+    let inMobiles = []
+    let outMobiles = []
+    const contacts = await User.query().select(['fname', 'lname', 'id', 'avatar', 'mobile']).whereIn('mobile', mobiles).where('is_guest', 0)
+    for(let contact of contacts) {
+      inMobiles.push(contact.mobile)
+    }
+    for(let mobile of mobiles) {
+      if(inMobiles.indexOf(mobile)<0) {
+        outMobiles.push(mobile)
+      }
+    }
+    // console.log(request.body)
+    UserContact.addContact(contacts, outMobiles, user.id)
     reply.code(200).send(contacts)
+  }
+
+  static async addFriend (request, reply) {
+    const friend = await User.query().where('id', request.params.users_id).first()
+    if(friend==null) {
+      return reply.code(404).send({
+        statusCode: 404,
+        error: "Not Found",
+        message: "دوست شما پیدا نشد"
+      })
+    }
+
+    const userContact = await UserContact.query().where('users_id', request.user.id).where('contact_id', friend.id).first()
+    if(userContact==null) {
+      await UserContact.query().insert({
+        users_id: request.user.id,
+        contact_id: friend.id,
+        contact: friend.mobile,
+        is_friend: 1,
+      })
+
+      return reply.send()
+    }
+
+    if(userContact.is_friend) {
+      return reply.code(406).send({
+        statusCode: 406,
+        error: "Not Acceptable",
+        message: "دوست شما قبلا به لیستتان اضافه شده است"
+      })
+    }
+
+    await UserContact.query().where('id', userContact.id).update({
+      is_friend: 1,
+    })
+
+    return reply.send()
+  }
+
+  static async list (request, reply) {
+    const friends = await UserContact.query().where('users_id', request.user.id).where('is_friend', 1).eager('[friend(defaultFriendSelects)]')
+    let output = []
+    for(let friend of friends) {
+      output.push(friend.friend)
+    }
+    return reply.send(output)
   }
 }
 

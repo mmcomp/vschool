@@ -13,6 +13,9 @@ class User extends Model {
       defaultSelects(builder) {
         builder.select('fname', 'lname', 'avatar', 'score', 'push_id')
       },
+      defaultFriendSelects(builder) {
+        builder.select('id', 'fname', 'lname', 'avatar', 'score')
+      },
     };
   }
 

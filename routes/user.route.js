@@ -1,16 +1,13 @@
 'use strict'
 
-const User = require('./models/user.model.js')
-const UserController = require('./controllers/user.controller')
-const OtpController = require('./controllers/otp.controller')
-const CourseController = require('./controllers/course.controller')
-const ChapterController = require('./controllers/chapter.controller')
-const LessonController = require('./controllers/lesson.controller')
-const DuelController = require('./controllers/duel.controller')
-const QuestionController = require('./controllers/question.controller')
-const PageController = require('./controllers/page.controller')
+const UserController = require('../controllers/user.controller')
+const OtpController = require('../controllers/otp.controller')
 
 async function routes (fastify, options) {
+  fastify.get('/api/test', async function(request, reply){
+      reply.send('salam')
+  })
+
   // Open
   fastify.post('/api/signin', {
     schema: {
@@ -94,7 +91,6 @@ async function routes (fastify, options) {
     preValidation: [fastify.authenticate]
   }, UserController.test)
 
-  // User
   fastify.post('/api/profile', {
     schema: {
       body: {
@@ -176,107 +172,6 @@ async function routes (fastify, options) {
   }, UserController.contacts)
 
   fastify.get('/api/push', UserController.pushTest)
-
-  // Course  
-  fastify.get('/api/course/chapters/:courses_id', {
-    preValidation: [fastify.authenticate]
-  }, CourseController.courseChapters)
-
-  fastify.get('/api/course/chapters', {
-    preValidation: [fastify.authenticate]
-  }, CourseController.chapters)
-
-  fastify.get('/api/course/map/:courses_id', {
-    preValidation: [fastify.authenticate]
-  }, CourseController.map)
-
-
-  fastify.get('/api/course/preview/:courses_id', CourseController.preview)
-
-  fastify.get('/api/course/:education_level', {
-    preValidation: [fastify.authenticate]
-  }, CourseController.courseOfEducationLevel)
-
-  fastify.get('/api/course', {
-    preValidation: [fastify.authenticate]
-  }, CourseController.index)
-
-  // Chapter
-  fastify.get('/api/chapter/lessons/:chapters_id', {
-    preValidation: [fastify.authenticate]
-  }, ChapterController.chapterLessons)
-
-  fastify.get('/api/chapter/lessons', {
-    preValidation: [fastify.authenticate]
-  }, ChapterController.lessons)
-
-  fastify.get('/api/chapter/exam/:chapters_id', {
-    preValidation: [fastify.authenticate]
-  }, ChapterController.exam)
-  
-  fastify.get('/api/chapter', {
-    preValidation: [fastify.authenticate]
-  }, ChapterController.index)
-
-  // Lesson
-  fastify.get('/api/lesson/pages/:lessons_id', {
-    preValidation: [fastify.authenticate]
-  }, LessonController.lessonPages)
-
-  fastify.get('/api/lesson/pages', {
-    preValidation: [fastify.authenticate]
-  }, LessonController.pages)
-
-  fastify.get('/api/lesson', {
-    preValidation: [fastify.authenticate]
-  }, LessonController.index)
-
-  // Question
-  fastify.get('/api/question/:id', QuestionController.load)
-
-  // Page
-  fastify.get('/api/page/:id', PageController.load)
-
-  // Duel
-  fastify.get('/api/duel/start', {
-    preValidation: [fastify.authenticate]
-  }, DuelController.start)
-
-  fastify.post('/api/duel/setcourse', {
-    schema: {
-      body: {
-        type: 'object',
-        required: ['duel_id', 'course_id'],
-        properties: {
-          duel_id: {
-            type: 'integer',
-            min: 1
-          },
-          course_id: {
-            type: 'integer',
-            min: 0
-          },
-          answers: {
-            type: 'object'
-          }
-        }
-      }
-    },
-    preValidation: [fastify.authenticate]
-  }, DuelController.setCourse)
-
-  fastify.get('/api/duel/list', {
-    preValidation: [fastify.authenticate]
-  }, DuelController.list)
-
-  fastify.get('/api/duel', {
-    preValidation: [fastify.authenticate]
-  }, DuelController.index)
-
-  // Admin
-  fastify.get('/', (request, reply) => {
-    reply.render('index.pug');
-  });
 }
 
 module.exports = routes

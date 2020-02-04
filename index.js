@@ -39,7 +39,15 @@ fastify.register(require('fastify-pug'), {views: 'views'})
 fastify.register(require('fastify-url-data'))
 
 fastify.register(require('./auth'))
-fastify.register(require('./route'))
+fastify.register(require('./routes/admin.route'))
+fastify.register(require('./routes/chapter.route'))
+fastify.register(require('./routes/course.route'))
+fastify.register(require('./routes/duel.route'))
+fastify.register(require('./routes/lesson.route'))
+fastify.register(require('./routes/page.route'))
+fastify.register(require('./routes/question.route'))
+fastify.register(require('./routes/subscription.route'))
+fastify.register(require('./routes/user.route'))
 
 fastify.register(require('fastify-static'), {
   root: path.join(__dirname, 'public'),

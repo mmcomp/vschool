@@ -1,31 +1,51 @@
 'use strict'
 
 const Chapter = require('../models/chapter.model')
-const Course = require('../models/course.model')
 const Lesson = require('../models/lesson.model')
 const Page = require('../models/page.model')
-// const Question = require('../models/question.model')
+const UserSubscription = require('../models/user_subscription.model')
+
+const SubscriptionController = require('./subscription.controller')
+
+
 
 class LessonController {
   static async index (request, reply) {
-    // const courses = await Course.query().where('education_level', request.user.education_level).pluck('id') 
-    // const chapters = await Chapter.query().whereIn('courses_id', courses).pluck('id')
-    const lessons = await Lesson.query()/*.whereIn('chapters_id', chapters)*/.eager('[ chapter(defaultSelects), chapter(defaultSelects).[ course(defaultSelects) ], questions(defaultSelects) ]')
+    const lessons = await Lesson.query().eager('[ chapter(defaultSelects), chapter(defaultSelects).[ course(defaultSelects) ], questions(defaultSelects) ]')
     reply.send(lessons)
   }
 
   static async pages (request, reply) {
-    // const courses = await Course.query().where('education_level', request.user.education_level).pluck('id') 
-    // const chapters = await Chapter.query().whereIn('courses_id', courses).pluck('id')
-    const lessons = await Lesson.query()/*.whereIn('chapters_id', chapters)*/.eager('[ chapter(defaultSelects), chapter(defaultSelects).[ course(defaultSelects) ], questions(defaultSelects), pages(defaultSelects, orderByPageOrder) ]')
+    const lessons = await Lesson.query().eager('[ chapter(defaultSelects), chapter(defaultSelects).[ course(defaultSelects) ], questions(defaultSelects), pages(defaultSelects, orderByPageOrder) ]')
     reply.send(lessons)
   }
   
   static async lessonPages (request, reply) {
-    // const courses = await Course.query().where('education_level', request.user.education_level).pluck('id') 
-    // const chapters = await Chapter.query().whereIn('courses_id', courses).pluck('id')
-    // const lesson = await Lesson.query().whereIn('chapters_id', chapters).where('id', request.params.lessons_id).eager('[ chapter(defaultSelects), chapter(defaultSelects).[ course(defaultSelects) ], questions(defaultSelects), pages(defaultSelects, orderByPageOrder) ]').first()
-    const tmpPages = await Page.query().select(['id', 'page']).where('lessons_id', request.params.lessons_id).eager('question(defaultSelects)')
+    await SubscriptionController.status()
+    let userSubscriptions = await UserSubscription.query().where('courses_id', 0).where('users_id', request.user.id).where('is_active', 1).first()
+    let applicationSubscription = false
+    if(userSubscriptions) {
+      applicationSubscription = true
+    }
+
+    const tmpPages = await Page.query().select(['id', 'page']).where('lessons_id', request.params.lessons_id).eager('[question(defaultSelects), lesson.[chapter.[course]]]')
+    if(!tmpPages[0]) {
+      return reply.send([])
+    }
+    const course_id = tmpPages[0].lesson.chapter.course.id
+    const chapter_order = tmpPages[0].lesson.chapter.chapter_order
+    let chaptersBefore = await Chapter.query().where('courses_id', course_id).where('id', '!=', tmpPages[0].lesson.chapter.id).where('chapter_order', '<=', chapter_order).count()
+    chaptersBefore = chaptersBefore[0]['count(*)']
+    if(chaptersBefore>0 && applicationSubscription==false) {
+      userSubscriptions = await UserSubscription.query().where('courses_id', course_id).where('users_id', request.user.id).where('is_active', 1).first()
+      if(!userSubscriptions) {
+        return reply.code(406).send({
+          statusCode: 406,
+          error: "Not Acceptable",
+          message: "این درست مستلزم پرداخت اشتراک است"
+        })
+      }
+    }
     let pages = [], datas
     for(let page of tmpPages) {
       datas = []
@@ -42,6 +62,7 @@ class LessonController {
         page.page = {}
       }
       page.page.data = datas
+      delete page.lesson
       pages.push(page)
     }
     reply.send(pages)

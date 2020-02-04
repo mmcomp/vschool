@@ -1,14 +1,36 @@
 'use strict'
 
+const SubscriptionController = require('./subscription.controller')
+
 const Course = require('../models/course.model')
 const Chapter = require('../models/chapter.model')
 const UserChapter = require('../models/user_chapter.model')
 const UserLesson = require('../models/user_lesson.model')
+const UserSubscription = require('../models/user_subscription.model')
 
 class CourseController {
   static async index (request, reply) {
-    const courses = await Course.query().select('id', 'name', 'description', 'education_level').where('published', 1)/*.where('education_level', request.user.education_level)*/
-    reply.send(courses)
+    await SubscriptionController.status()
+    let userSubscriptions = await UserSubscription.query().where('courses_id', 0).where('users_id', request.user.id).where('is_active', 1).first()
+    let applicationSubscription = false
+    if(userSubscriptions) {
+      applicationSubscription = true
+    }
+    let theCourses = []
+    const courses = await Course.query().select('id', 'name', 'description', 'education_level').where('published', 1).where('education_level', request.user.education_level)
+    for(let course of courses) {
+      course.locked = true
+      if(applicationSubscription) {
+        course.locked = false
+      }else {
+        userSubscriptions = await UserSubscription.query().where('courses_id', course.id).where('users_id', request.user.id).where('is_active', 1).first()
+        if(userSubscriptions) {
+          course.locked = false
+        }
+      }
+      theCourses.push(course)
+    }
+    reply.send(theCourses)
   }
   
   static async courseOfEducationLevel (request, reply) {

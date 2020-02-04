@@ -173,9 +173,18 @@ class DuelController {
 
   static async index (request, reply) {
     DuelController.status()
-    const duels = await Duel.query().select(['id', 'user_turn', 'status', 'updated_at']).where(function(query) {
+    const duels = await Duel.query().select(['id', 'user_turn', 'status']).where(function(query) {
       query.where('starter_users_id', request.user.id).orWhere('opponent_users_id', request.user.id)
-    }).whereIn('status', ['waiting', 'matched', 'started']).eager('[starter(defaultSelects), opponent(defaultSelects), details, questions]')
+    }).whereIn('status', ['matched', 'started']).eager('[starter(defaultSelects), opponent(defaultSelects), details, questions]')
+
+    reply.send(duels)
+  }
+
+  static async match (request, reply) {
+    DuelController.status()
+    const duels = await Duel.query().select(['id', 'user_turn', 'status']).where(function(query) {
+      query.where('starter_users_id', request.user.id).orWhere('opponent_users_id', request.user.id)
+    }).whereIn('status', ['waiting']).eager('[starter(defaultSelects), opponent(defaultSelects), details, questions]')
 
     reply.send(duels)
   }
@@ -344,7 +353,7 @@ class DuelController {
   static async list (request, reply) {
     DuelController.status()
     
-    const duels = await Duel.query().select(['id', 'user_turn', 'status', 'updated_at']).where(function(query) {
+    const duels = await Duel.query().select(['id', 'user_turn', 'status']).where(function(query) {
       query.where('starter_users_id', request.user.id).orWhere('opponent_users_id', request.user.id)
     }).whereNotIn('status', ['waiting', 'matched', 'started']).eager('[starter(defaultSelects), opponent(defaultSelects), details, details.[questions], questions]')
 

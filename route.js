@@ -143,6 +143,22 @@ async function routes (fastify, options) {
     preValidation: [fastify.authenticate]
   }, UserController.list)
 
+  fastify.post('/api/contacts/add', {
+    schema: {
+      body: {
+        type: 'object',
+        required: ['contacts'],
+        properties: {
+          contacts: {
+            type: 'array',
+            minLength: 1
+          }
+        }
+      }
+    },
+    preValidation: [fastify.authenticate]
+  }, UserController.addFriends)
+
   fastify.post('/api/contacts', {
     schema: {
       body: {
@@ -158,7 +174,6 @@ async function routes (fastify, options) {
     },
     preValidation: [fastify.authenticate]
   }, UserController.contacts)
-
 
   fastify.get('/api/push', UserController.pushTest)
 

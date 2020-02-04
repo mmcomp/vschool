@@ -292,6 +292,36 @@ class UserController {
     return reply.send()
   }
 
+  static async addFriends (request, reply) {
+    const friends = await User.query().whereIn('id', request.body.contacts).where('id', '!=', request.user.id)
+    if(!friends[0]) {
+      return reply.code(404).send({
+        statusCode: 404,
+        error: "Not Found",
+        message: "دوستی پیدا نشد"
+      })
+    }
+
+    let userContact = null
+    for(let friend of friends) {
+      userContact = await UserContact.query().where('users_id', request.user.id).where('contact_id', friend.id).first()
+      if(userContact==null) {
+        await UserContact.query().insert({
+          users_id: request.user.id,
+          contact_id: friend.id,
+          contact: friend.mobile,
+          is_friend: 1,
+        })
+      }else if(userContact.is_friend==0){
+        await UserContact.query().where('id', userContact.id).update({
+          is_friend: 1,
+        })
+      }
+    }
+
+    return reply.send()
+  }
+
   static async list (request, reply) {
     const friends = await UserContact.query().where('users_id', request.user.id).where('is_friend', 1).eager('[friend(defaultFriendSelects)]')
     let output = []

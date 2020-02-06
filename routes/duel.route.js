@@ -35,7 +35,7 @@ async function routes(fastify, options) {
         preValidation: [fastify.authenticate]
     }, DuelController.list)
 
-    fastify.get('/api/duel/match', {
+    fastify.get('/api/duel/match/:id', {
         preValidation: [fastify.authenticate]
     }, DuelController.match)
 

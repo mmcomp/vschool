@@ -184,7 +184,7 @@ class DuelController {
     DuelController.status()
     const duels = await Duel.query().select(['id', 'user_turn', 'status']).where(function(query) {
       query.where('starter_users_id', request.user.id).orWhere('opponent_users_id', request.user.id)
-    }).whereIn('status', ['waiting']).eager('[starter(defaultSelects), opponent(defaultSelects), details, questions]')
+    }).where('id', request.params.id).eager('[starter(defaultSelects), opponent(defaultSelects), details, questions]')
 
     reply.send(duels)
   }

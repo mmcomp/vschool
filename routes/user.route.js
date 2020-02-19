@@ -107,6 +107,30 @@ async function routes (fastify, options) {
     preValidation: [fastify.authenticate]
   }, UserController.profile)
 
+  fastify.post('/api/introduce', {
+    schema: {
+      body: {
+        type: 'object',
+        required: ['fname', 'lname', 'avatar'],
+        properties: {
+          fname: {
+            type: 'string',
+            minLength: 3
+          },
+          lname: {
+            type: 'string',
+            minLength: 5
+          },
+          avatar: {
+            type: 'number',
+            minimum: 1
+          },
+        }
+      }
+    },
+    preValidation: [fastify.authenticate]
+  }, UserController.introduce)
+
   fastify.get('/api/otp/:mobile' , {
     preValidation: [fastify.authenticate]
   } , OtpController.requestOtp)

@@ -68,6 +68,24 @@ class UserController {
     reply.code(200).send()
   }
 
+  static async introduce (request, reply) {
+    const user = await User.query().where('id', request.user.id).first()
+    if(!user) {
+      return reply.code(404).send({
+        statusCode: 404,
+        error: "Not Found",
+        message: "کاربر شما درست وارد نشده است مجدد توکن بگیرید"
+      })
+    }
+
+    User.query().where('id', user.id).update(request.body).then(result => {
+      console.log('Update Result', result)
+    }).catch(e => {
+      console.log('Update Error', e)
+    })
+    reply.code(200).send()
+  }
+
   static async passPage (request, reply) {
     const page = await Page.query().eager('lesson').findById(request.params.pages_id)
     if(!page) {
